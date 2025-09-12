@@ -418,7 +418,8 @@ function TrialRequestCard({ request, onReview }: { request: TrialRequestDto; onR
 
 export default function AdminTrialRequestsPage()
 {
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const subscriptionHooks = useSubscriptionHooks();
     const { data: requests = [], isLoading } = subscriptionHooks.getTrialRequests();
     const reviewRequest = subscriptionHooks.reviewTrialRequest();

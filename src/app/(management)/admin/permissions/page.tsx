@@ -93,7 +93,8 @@ const PERMISSION_CATEGORIES = {
 };
 
 export default function PermissionsPage() {
-  const { data: session } = useSession();
+  // const { data: session } = useSession(); // Removed auth
+  const session = null; // Mock session - auth removed
   const [searchUserId, setSearchUserId] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   

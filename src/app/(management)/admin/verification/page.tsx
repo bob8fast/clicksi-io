@@ -57,7 +57,8 @@ const sortOptions = [
 
 export default function AdminVerificationListPage()
 {
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const router = useRouter();
     const searchParams = useSearchParams();
 

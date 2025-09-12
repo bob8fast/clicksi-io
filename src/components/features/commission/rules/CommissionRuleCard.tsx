@@ -55,7 +55,8 @@ export function CommissionRuleCard({ rule }: CommissionRuleCardProps)
 {
     const [isUpdating, setIsUpdating] = useState(false);
     const commissionHooks = useCommissionHooks();
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const entityType = getEntityType(session?.user_info);
     // Mutations
     const updateStateMutation = commissionHooks.updateRuleState();

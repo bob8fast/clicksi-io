@@ -16,7 +16,8 @@ interface IntegrationsDashboardProps {
 }
 
 export const IntegrationsDashboard = ({ entityType }: IntegrationsDashboardProps) => {
-  const { data: session } = useSession();
+  // const { data: session } = useSession(); // Removed auth
+  const session = null; // Mock session - auth removed
   const { getTeamConnections } = useIntegrationHooks();
   
   const teamId = session?.user_info?.team_id;

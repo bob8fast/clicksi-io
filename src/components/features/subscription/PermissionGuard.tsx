@@ -52,7 +52,8 @@ export function PermissionGuard({
 }: PermissionGuardProps)
 {
     const router = useRouter();
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     
     const subscriptionHooks = useSubscriptionHooks();
     // For now, use simplified subscription logic without team_id
@@ -299,7 +300,8 @@ interface UsageMeterProps
 
 export function UsageMeter({ feature, showUpgradeWhen = 80 }: UsageMeterProps)
 {
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const subscriptionHooks = useSubscriptionHooks();
     // For now, use simplified subscription logic without team_id
     // TODO: Implement proper team subscription lookup when team_id is available

@@ -15,7 +15,8 @@ export default function RetailersPage()
 {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     
     // Get current brand and team IDs from URL parameters
     // In real implementation, these would come from user context/session

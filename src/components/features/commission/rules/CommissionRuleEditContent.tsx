@@ -49,7 +49,8 @@ interface CommissionRuleEditContentProps
 export function CommissionRuleEditContent({ ruleId }: CommissionRuleEditContentProps)
 {
     const router = useRouter();
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const entityType = getEntityType(session?.user_info);
     const [effectiveFromDate, setEffectiveFromDate] = useState<Date>();
     const [effectiveToDate, setEffectiveToDate] = useState<Date | undefined>();

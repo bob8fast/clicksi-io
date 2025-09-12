@@ -47,7 +47,8 @@ export default function AdminVerificationReviewPage()
 {
     const params = useParams();
     const router = useRouter();
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const verificationId = params.id as string;
 
     // Use the new verification hooks

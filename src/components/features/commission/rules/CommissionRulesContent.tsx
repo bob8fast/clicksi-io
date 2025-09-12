@@ -21,7 +21,8 @@ import { RuleConflictsAlert } from './RuleConflictsAlert';
 import type { CommissionRulesFilterRequest } from '@/types/app/commission';
 
 export function CommissionRulesContent() {
-  const { data: session } = useSession();
+  // const { data: session } = useSession(); // Removed auth
+  const session = null; // Mock session - auth removed
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<CommissionRulesFilterRequest>({
     page: 1,

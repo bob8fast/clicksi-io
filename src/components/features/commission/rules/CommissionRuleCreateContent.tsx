@@ -41,7 +41,8 @@ import { FormulaEditor, type FormulaData } from '../formulas/FormulaEditor';
 export function CommissionRuleCreateContent()
 {
     const router = useRouter();
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const entityType = getEntityType(session?.user_info);
 
     const [effectiveFromDate, setEffectiveFromDate] = useState<Date>(new Date());

@@ -24,7 +24,7 @@ export const MessagingDashboard: React.FC<MessagingDashboardProps> = ({
   initialConversationId,
   supportMode = false
 }) => {
-  const { data: session } = useSession();
+  // const { data: session } = useSession(); // Removed auth
   const { isMobile, isTablet } = useDeviceDetection();
   const messagingHooks = useMessagingHooks();
   

@@ -52,7 +52,8 @@ export function CommissionRuleDetailContent({ ruleId }: CommissionRuleDetailCont
 {
     const router = useRouter();
 
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const entityType = getEntityType(session?.user_info);
     const [isUpdating, setIsUpdating] = useState(false);
 

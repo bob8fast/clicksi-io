@@ -31,7 +31,9 @@ export default function RoutePermissionWrapper({
     customFallback,
 }: RoutePermissionWrapperProps)
 {
-    const { data: session, status } = useSession();
+    // const { data: session, status } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
+    const status = 'unauthenticated'; // Mock status - auth removed
     const router = useRouter();
     
     const subscriptionHooks = useSubscriptionHooks();
@@ -55,7 +57,7 @@ export default function RoutePermissionWrapper({
         }
 
         // Check role requirement
-        if (requiredRole && session.user_info?.user_role !== requiredRole)
+        if (requiredRole && session?.user_info?.user_role !== requiredRole)
         {
             router.push('/unauthorized');
             return;
@@ -99,7 +101,7 @@ export default function RoutePermissionWrapper({
     }
 
     // Role check failed
-    if (requiredRole && session.user_info?.user_role !== requiredRole)
+    if (requiredRole && session?.user_info?.user_role !== requiredRole)
     {
         if (customFallback) return <>{customFallback}</>;
         return (

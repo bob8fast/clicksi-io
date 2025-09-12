@@ -37,7 +37,8 @@ interface BrandDetailPageProps
 export default function BrandDetailPage({ brandId }: BrandDetailPageProps)
 {
     const { data: brand, isLoading, error } = useBrand(brandId);
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const router = useRouter();
 
     const isOwner = session?.user_info?.user_id === brand?.ownerId;

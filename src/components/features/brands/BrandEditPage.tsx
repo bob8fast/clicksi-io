@@ -56,7 +56,8 @@ interface BrandEditPageProps
 export default function BrandEditPage({ brandId }: BrandEditPageProps)
 {
     const { data: brand, isLoading, error } = useBrand(brandId);
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const router = useRouter();
     const updateBrand = useUpdateBrand();
 

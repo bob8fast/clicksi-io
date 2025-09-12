@@ -97,7 +97,8 @@ interface RetailerEditPageProps
 export default function RetailerEditPage({ retailerId }: RetailerEditPageProps)
 {
     const { data: retailer, isLoading, error } = useRetailer(retailerId);
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const router = useRouter();
     const updateRetailer = useUpdateRetailer();
 

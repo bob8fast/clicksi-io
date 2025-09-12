@@ -18,7 +18,8 @@ export default function RetailerManagementPage() {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     
     const retailerId = params.id as string;
     const brandId = searchParams.get('brandId') || '';

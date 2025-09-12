@@ -41,7 +41,8 @@ interface RetailerDetailPageProps
 export default function RetailerDetailPage({ retailerId }: RetailerDetailPageProps)
 {
     const { data: retailer, isLoading, error } = useRetailer(retailerId);
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const router = useRouter();
 
     const isOwner = session?.user_info?.user_id === retailer?.ownerId;

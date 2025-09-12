@@ -66,7 +66,8 @@ interface ProductDetailsContentProps
 
 export default function ProductDetailsContent({ productId }: ProductDetailsContentProps)
 {
-    const { data: session } = useSession();
+    // const { data: session } = useSession(); // Removed auth
+    const session = null; // Mock session - auth removed
     const { data: product, isLoading, error } = useProductHooks().getById({ productId: productId });
 
     // Fetch brand details if product is loaded
