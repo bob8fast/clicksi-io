@@ -1,0 +1,16 @@
+
+@import "react-day-picker/style.css";
+
+/* Theme-specific styles for shadcn/ui date picker */
+
+.rdp-root {
+  --rdp-accent-color: var(--color-orange);
+  --rdp-background-color: var(--color-accent);
+  --rdp-outside-opacity: 0.3;
+  --rdp-disabled-opacity: 0.1
+}
+
+.rdp-dropdown{
+  background-color: var(--color-accent);
+}
+

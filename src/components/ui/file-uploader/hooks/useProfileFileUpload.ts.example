@@ -1,0 +1,134 @@
+// hooks/useProfileFileUpload.ts
+// Profile-specific file upload integration following the const object pattern
+
+import { useFileUploadIntegration } from './useFileUploadIntegration';
+import { 
+    useUploadImage,
+    useGetProfilePicture
+} from '@/gen/api/hooks/user_management/user-images';
+
+/**
+ * Profile file upload hooks following the const object pattern from category-hooks.ts
+ * Provides standardized interface for profile image operations
+ */
+export const useProfileFileUpload = () => {
+    const { createUploadHandler, createSignedUrlHandler } = useFileUploadIntegration();
+    
+    // Get actual orval hooks
+    const { mutate: uploadImageMutation } = useUploadImage();
+    const { mutateAsync: getProfilePictureMutation } = useGetProfilePicture();
+    
+    // Wrapper functions to adapt orval hooks to our integration pattern
+    const uploadProfileImageMutation = (data: any, callbacks: any) => {
+        uploadImageMutation(
+            { data: { image: data.data.file } as any }, 
+            {
+                onSuccess: (result) => {
+                    callbacks.onSuccess({
+                        uploadStatus: 'success' as const,
+                        imageId: result?.image_id || 'profile-image-' + Date.now(),
+                        file: data.data.file
+                    });
+                },
+                onError: callbacks.onError
+            }
+        );
+    };
+    
+    const getSignedUrlsMutation = async (data: any) => {
+        try {
+            // For profile images, get signed URL through profile picture endpoint
+            const profilePicture = await getProfilePictureMutation({
+                pathParams: { userId: 'current' }
+            });
+            
+            return {
+                ttl_seconds: 3600,
+                expires_at: new Date(Date.now() + 3600000).toISOString(),
+                urls: [{
+                    media_id: data.data.image_storage_paths[0] || 'current',
+                    url: profilePicture?.url || `https://profile-fallback.com`
+                }]
+            };
+        } catch (error) {
+            console.error('Failed to get profile picture signed URL:', error);
+            throw error;
+        }
+    };
+
+    // Create const objects with predefined caching and invalidation
+    const profileFileHooks = {
+        /**
+         * Upload profile image with cache invalidation
+         */
+        uploadImage: () => {
+            return createUploadHandler(uploadProfileImageMutation, {
+                onSuccess: (result) => {
+                    console.log('Profile image uploaded:', result.imageId);
+                },
+                onError: (error) => {
+                    console.error('Profile image upload failed:', error);
+                },
+                invalidateQueries: ['user', 'profile'] // Invalidate user profile cache
+            });
+        },
+
+        /**
+         * Get signed URLs for profile images
+         */
+        getSignedUrls: () => {
+            return createSignedUrlHandler(getSignedUrlsMutation, {
+                onError: (error) => {
+                    console.error('Failed to get profile image signed URLs:', error);
+                }
+            });
+        },
+
+        /**
+         * Complete profile image upload workflow with immediate preview
+         */
+        uploadWithPreview: () => {
+            return async (file: File) => {
+                try {
+                    // Upload file first using orval hook directly for better control
+                    const uploadResult = await new Promise((resolve, reject) => {
+                        uploadImageMutation(
+                            { data: { image: file } as any },
+                            {
+                                onSuccess: (result) => resolve({
+                                    uploadStatus: 'success' as const,
+                                    imageId: result?.image_id || 'profile-' + Date.now(),
+                                    file
+                                }),
+                                onError: reject
+                            }
+                        );
+                    }) as any;
+                    
+                    // Get signed URL for immediate preview
+                    let previewUrl = null;
+                    try {
+                        const profilePicture = await getProfilePictureMutation({
+                            pathParams: { userId: 'current' }
+                        });
+                        previewUrl = profilePicture?.url;
+                    } catch (error) {
+                        console.warn('Failed to get signed URL, using blob URL fallback:', error);
+                        previewUrl = URL.createObjectURL(file);
+                    }
+                    
+                    return {
+                        ...uploadResult,
+                        previewUrl,
+                        signedUrl: previewUrl
+                    };
+                } catch (error) {
+                    console.error('Profile image upload with preview failed:', error);
+                    throw error;
+                }
+            };
+        }
+    };
+
+    return profileFileHooks;
+};
