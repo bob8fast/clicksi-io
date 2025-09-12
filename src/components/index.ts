@@ -16,7 +16,7 @@ export * from './features';
 export * from './shared';
 
 // Page-level components
-export * from './pages';
+export * from './Pages';
 
 // Legal components
 export * from './legal';
