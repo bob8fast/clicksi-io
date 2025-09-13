@@ -179,6 +179,16 @@ const Header = () =>
             label: 'Contact',
             submenu: []
         },
+                {
+            href: '/faq',
+            label: 'FAQ',
+            submenu: []
+        },
+        {
+            href: '/demo-menu',
+            label: 'Demo',
+            submenu: []
+        },
     ];
 
     const navItems = isAuthenticated ? authNavItems : guestNavItems;
