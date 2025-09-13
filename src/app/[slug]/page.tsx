@@ -11,12 +11,24 @@ interface PageProps {
 // ISR: Revalidate every 24 hours
 export const revalidate = 86400;
 
+// Force dynamic rendering during build for database-driven pages
+export const dynamic = 'auto';
+
 export async function generateStaticParams() {
+  // During build time on Vercel, the database might not be available
+  // Return empty array to force dynamic rendering for all routes
+  if (process.env.VERCEL && process.env.NODE_ENV === 'production') {
+    console.log('[BUILD] Skipping static param generation on Vercel - using dynamic rendering');
+    return [];
+  }
+
+  // For local development, try to generate static params
   try {
     const slugs = await fetchDynamicPageSlugs();
+    console.log(`[BUILD] Generated static params for ${slugs.length} pages:`, slugs);
     return slugs.map((slug: string) => ({ slug }));
   } catch (error) {
-    console.error('Error generating static params:', error);
+    console.error('[BUILD] Error generating static params, falling back to dynamic rendering:', error);
     return [];
   }
 }

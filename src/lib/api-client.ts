@@ -7,8 +7,17 @@ const getBaseUrl = () => {
     return '';
   }
 
-  // Server: use environment variable or fallback
-  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  // Server-side: Check for Vercel URL first, then fallback
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+
+  // Local development fallback
+  return 'http://localhost:3000';
 };
 
 // Helper function to parse dates from API response
@@ -24,17 +33,28 @@ function parseDatesInPage(page: any): DynamicPage {
 export async function fetchPageData(slug: string): Promise<DynamicPage | null> {
   try {
     const baseUrl = getBaseUrl();
+    console.log(`[API] Fetching page data for slug: ${slug} from ${baseUrl}`);
+
     const response = await fetch(`${baseUrl}/api/dynamic-pages?slug=${slug}`, {
-      next: { revalidate: 86400 } // Cache for 24 hours
+      next: { revalidate: 86400 }, // Cache for 24 hours
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
+
+    console.log(`[API] Response status: ${response.status}`);
 
     if (response.ok) {
       const page = await response.json();
+      console.log(`[API] Successfully fetched page: ${page.title || 'No title'}`);
       return parseDatesInPage(page);
+    } else {
+      const errorText = await response.text();
+      console.error(`[API] Failed to fetch page data: ${response.status} - ${errorText}`);
     }
     return null;
   } catch (error) {
-    console.error('Error fetching page data:', error);
+    console.error(`[API] Error fetching page data for "${slug}":`, error);
     return null;
   }
 }

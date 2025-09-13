@@ -4,7 +4,15 @@
       "runtime": "nodejs20.x"
     }
   },
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
   "env": {
     "DATABASE_PAGES_URL": "@database_pages_url"
+  },
+  "build": {
+    "env": {
+      "DATABASE_PAGES_URL": "@database_pages_url"
+    }
   }
 }
