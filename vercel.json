@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "env": {
+    "DATABASE_PAGES_URL": "@database_pages_url"
+  }
+}

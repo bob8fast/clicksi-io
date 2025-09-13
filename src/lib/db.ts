@@ -46,16 +46,27 @@ function getPool(): Pool {
       throw new Error('DATABASE_PAGES_URL environment variable is not set');
     }
 
+    // Optimized for Vercel serverless environment
+    const isVercel = process.env.VERCEL === '1';
+
     pool = new Pool({
       connectionString,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      max: isVercel ? 1 : 10, // Single connection for serverless
+      idleTimeoutMillis: isVercel ? 10000 : 30000,
+      connectionTimeoutMillis: isVercel ? 10000 : 2000, // Longer timeout for serverless
+      ssl: isVercel ? { rejectUnauthorized: false } : undefined, // SSL for production
     });
 
     pool.on('error', (err) => {
       console.error('PostgreSQL pool error:', err);
     });
+
+    // Graceful shutdown for Vercel
+    if (isVercel) {
+      process.on('beforeExit', async () => {
+        await closePool();
+      });
+    }
   }
 
   return pool;
@@ -63,18 +74,29 @@ function getPool(): Pool {
 
 // Get page by slug (for dynamic pages - only published)
 export async function getPageBySlug(slug: string): Promise<DynamicPage | null> {
-  const pool = getPool();
-
   try {
+    const pool = getPool();
+
+    console.log(`[DB] Fetching page by slug: ${slug}`);
+
     const result = await pool.query(
       'SELECT * FROM pages WHERE slug = $1 AND status = $2',
       [slug, 'published']
     );
 
+    console.log(`[DB] Query result: ${result.rows.length} rows found`);
     return result.rows[0] || null;
   } catch (error) {
-    console.error('Error fetching page by slug:', error);
-    throw new Error('Failed to fetch page');
+    console.error(`[DB] Error fetching page by slug "${slug}":`, error);
+
+    // Log specific error details for debugging
+    if (error instanceof Error) {
+      console.error(`[DB] Error message: ${error.message}`);
+      console.error(`[DB] Error stack: ${error.stack}`);
+    }
+
+    // Return null for graceful degradation instead of throwing
+    return null;
   }
 }
 

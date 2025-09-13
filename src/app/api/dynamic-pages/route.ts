@@ -3,6 +3,9 @@ import { getAllPages, getPageById } from '@/lib/db';
 import { revalidateTag, revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Force Node.js runtime for database compatibility
+export const runtime = 'nodejs';
+
 // GET - Fetch pages
 export async function GET(request: NextRequest) {
   try {
