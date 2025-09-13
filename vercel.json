@@ -8,11 +8,17 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {
-    "DATABASE_PAGES_URL": "@database_pages_url"
+    "DATABASE_PAGES_URL": "@database_pages_url",
+    "NEXT_PUBLIC_PAGES_URL": "@pages_url",
+    "NEXT_PUBLIC_PAGES_ANON_KEY": "@pages_anon_key",
+    "PAGES_SERVICE_ROLE_KEY": "@pages_service_role_key"
   },
   "build": {
     "env": {
-      "DATABASE_PAGES_URL": "@database_pages_url"
+      "DATABASE_PAGES_URL": "@database_pages_url",
+      "NEXT_PUBLIC_PAGES_URL": "@pages_url",
+      "NEXT_PUBLIC_PAGES_ANON_KEY": "@pages_anon_key",
+      "PAGES_SERVICE_ROLE_KEY": "@pages_service_role_key"
     }
   }
 }

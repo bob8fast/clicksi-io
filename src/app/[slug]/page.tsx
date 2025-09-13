@@ -1,6 +1,6 @@
 // app/[slug]/page.tsx - Dynamic pages route
 import { generatePageMetadata, generateAllStructuredData } from '@/lib/seo';
-import { fetchPageData, fetchDynamicPageSlugs } from '@/lib/api-client';
+import { getPageBySlugSupabase, getDynamicPageSlugsSupabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
@@ -24,7 +24,7 @@ export async function generateStaticParams() {
 
   // For local development, try to generate static params
   try {
-    const slugs = await fetchDynamicPageSlugs();
+    const slugs = await getDynamicPageSlugsSupabase();
     console.log(`[BUILD] Generated static params for ${slugs.length} pages:`, slugs);
     return slugs.map((slug: string) => ({ slug }));
   } catch (error) {
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
 
   try {
-    const page = await fetchPageData(slug);
+    const page = await getPageBySlugSupabase(slug);
 
     if (!page) {
       return {
@@ -117,9 +117,9 @@ export default async function DynamicPage({ params }: PageProps) {
 
   let page;
   try {
-    page = await fetchPageData(slug);
+    page = await getPageBySlugSupabase(slug);
   } catch (error) {
-    console.error('API error:', error);
+    console.error('Supabase error:', error);
     notFound();
   }
 

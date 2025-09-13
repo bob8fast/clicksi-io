@@ -1,6 +1,6 @@
 // app/(main)/(legal)/privacy-policy/page.tsx
 import { generateLegalPageMetadata } from '@/lib/seo';
-import { fetchPageData } from '@/lib/api-client';
+import { getLegalPageContentSupabase } from '@/lib/supabase';
 import PrivacyPolicyPage from "@/components/legal/PrivacyPolicyPage";
 import { Metadata } from 'next';
 
@@ -9,7 +9,7 @@ export const revalidate = 86400;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const page = await fetchPageData('privacy-policy');
+    const page = await getLegalPageContentSupabase('privacy-policy');
 
     if (page) {
       return generateLegalPageMetadata(page);
@@ -46,8 +46,8 @@ function renderContent(content: any): JSX.Element {
 }
 
 export default async function Page() {
-  // Try to get content from API first
-  const pageFromDB = await fetchPageData('privacy-policy');
+  // Try to get content from Supabase first
+  const pageFromDB = await getLegalPageContentSupabase('privacy-policy');
 
   // If database content exists, show it
   if (pageFromDB && pageFromDB.content) {

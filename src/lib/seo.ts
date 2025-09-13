@@ -20,6 +20,26 @@ const defaultSEOConfig: SEOConfig = {
   twitterHandle: '@clicksi',
 };
 
+// Helper function to safely convert date to ISO string
+function toISOStringSafe(date: Date | string | undefined | null): string | undefined {
+  if (!date) return undefined;
+
+  try {
+    if (date instanceof Date) {
+      return date.toISOString();
+    }
+
+    if (typeof date === 'string') {
+      return new Date(date).toISOString();
+    }
+
+    return undefined;
+  } catch (error) {
+    console.warn('Failed to convert date to ISO string:', date, error);
+    return undefined;
+  }
+}
+
 // Generate metadata for pages from database
 export function generatePageMetadata(
   page: DynamicPage,
@@ -59,8 +79,8 @@ export function generatePageMetadata(
       url,
       siteName: 'Clicksi',
       locale: page.lang || 'en_US',
-      publishedTime: page.created_at?.toISOString(),
-      modifiedTime: page.updated_at?.toISOString(),
+      publishedTime: toISOStringSafe(page.created_at),
+      modifiedTime: toISOStringSafe(page.updated_at),
       images: ogImage ? [{
         url: ogImage,
         width: firstImage?.width || 1200,
@@ -101,8 +121,8 @@ export function generateStructuredData(page: DynamicPage, config: SEOConfig = {}
     headline: page.title,
     description: page.description,
     url,
-    datePublished: page.created_at?.toISOString(),
-    dateModified: page.updated_at?.toISOString(),
+    datePublished: toISOStringSafe(page.created_at),
+    dateModified: toISOStringSafe(page.updated_at),
     author: {
       '@type': 'Organization',
       name: 'Clicksi',
