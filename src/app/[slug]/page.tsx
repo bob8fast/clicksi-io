@@ -8,11 +8,11 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-// ISR: Revalidate every 24 hours
-export const revalidate = 86400;
+// Force dynamic rendering for database-driven pages on Vercel
+export const dynamic = 'force-dynamic';
 
-// Force dynamic rendering during build for database-driven pages
-export const dynamic = 'auto';
+// ISR: Revalidate every 24 hours (when using static generation)
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   // During build time on Vercel, the database might not be available

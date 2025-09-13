@@ -4,7 +4,10 @@ import { getLegalPageContentSupabase } from '@/lib/supabase';
 import PrivacyPolicyPage from "@/components/legal/PrivacyPolicyPage";
 import { Metadata } from 'next';
 
-// ISR: Revalidate every 24 hours
+// Force dynamic rendering for database-driven pages on Vercel
+export const dynamic = 'force-dynamic';
+
+// ISR: Revalidate every 24 hours (when using static generation)
 export const revalidate = 86400;
 
 export async function generateMetadata(): Promise<Metadata> {

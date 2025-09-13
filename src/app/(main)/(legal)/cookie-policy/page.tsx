@@ -1,14 +1,18 @@
 // app/(main)/(legal)/cookie-policy/page.tsx
 import { generateLegalPageMetadata } from '@/lib/seo';
-import { fetchPageData } from '@/lib/api-client';
+import { getLegalPageContentSupabase } from '@/lib/supabase';
 import CookiePolicyPage from "@/components/legal/CookiePolicyPage";
 import { Metadata } from 'next';
 
+// Force dynamic rendering for database-driven pages on Vercel
+export const dynamic = 'force-dynamic';
+
+// ISR: Revalidate every 24 hours (when using static generation)
 export const revalidate = 86400;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const page = await fetchPageData('cookie-policy');
+    const page = await getLegalPageContentSupabase('cookie-policy');
 
     if (page) {
       return generateLegalPageMetadata(page);
@@ -43,7 +47,7 @@ function renderContent(content: any): JSX.Element {
 }
 
 export default async function Page() {
-  const pageFromDB = await fetchPageData('cookie-policy');
+  const pageFromDB = await getLegalPageContentSupabase('cookie-policy');
 
   if (pageFromDB && pageFromDB.content) {
     return (
