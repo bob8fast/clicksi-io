@@ -1,0 +1,186 @@
+// hooks/useCategoryFileUpload.ts
+// Category-specific file upload integration following the existing category-hooks.ts pattern
+
+import { useFileUploadIntegration } from './useFileUploadIntegration';
+import { useCategoryHooks } from '@/hooks/api/category-hooks';
+import { 
+    useUploadCategoryImage,
+    useGetCategoryImageUrls
+} from '@/gen/api/hooks/product_catalog/categories';
+
+/**
+ * Category file upload hooks that extend the existing useCategoryHooks pattern
+ * Integrates with the existing category management system
+ */
+export const useCategoryFileUpload = () => {
+    const { createUploadHandler, createSignedUrlHandler } = useFileUploadIntegration();
+    
+    // Use existing category hooks for cache invalidation
+    const existingCategoryHooks = useCategoryHooks();
+    
+    // Get actual orval hooks
+    const { mutate: uploadCategoryImageMutation } = useUploadCategoryImage();
+    const { mutateAsync: getCategoryImageUrlsMutation } = useGetCategoryImageUrls();
+    
+    // Wrapper functions to adapt orval hooks to our integration pattern
+    const categoryUploadMutation = (data: any, callbacks: any) => {
+        const formData = new FormData();
+        formData.append('image', data.data.file);
+        if (data.data.category_id) {
+            formData.append('json', JSON.stringify({ category_id: data.data.category_id }));
+        }
+        
+        uploadCategoryImageMutation(
+            { data: { image: data.data.file, json: { category_id: data.data.category_id } } as any },
+            {
+                onSuccess: (result) => {
+                    callbacks.onSuccess({
+                        uploadStatus: 'success' as const,
+                        imageId: result?.image_id || 'category-' + Date.now(),
+                        file: data.data.file,
+                        category_id: data.data.category_id
+                    });
+                    // Invalidate existing category caches
+                    existingCategoryHooks.invalidateCache.all();
+                },
+                onError: callbacks.onError
+            }
+        );
+    };
+    
+    const getImageUrlsMutation = async (data: any) => {
+        try {
+            const response = await getCategoryImageUrlsMutation({
+                data: { image_storage_paths: data.data.image_storage_paths }
+            });
+            
+            return {
+                ttl_seconds: response.ttl_seconds || 7200,
+                expires_at: response.expires_at || new Date(Date.now() + 7200000).toISOString(),
+                cache_version: 1,
+                urls: response.image_urls?.map(imageUrl => ({
+                    media_id: imageUrl.image_id,
+                    url: imageUrl.url,
+                    category_id: data.data.category_id
+                })) || []
+            };
+        } catch (error) {
+            console.error('Failed to get category image signed URLs:', error);
+            throw error;
+        }
+    };
+
+    const categoryFileHooks = {
+        /**
+         * Upload category image with existing cache invalidation pattern
+         * Extends the existing category hooks pattern
+         */
+        uploadImage: (categoryId: string) => {
+            return createUploadHandler(categoryUploadMutation, {
+                onSuccess: (result) => {
+                    console.log('Category image uploaded:', result.imageId);
+                    // Use existing category hooks invalidation
+                    existingCategoryHooks.invalidateCache.all();
+                },
+                onError: (error) => {
+                    console.error('Category image upload failed:', error);
+                },
+                invalidateQueries: ['categories', `category-${categoryId}`]
+            });
+        },
+
+        /**
+         * Get signed URLs for category images (extends existing getImageUrls)
+         */
+        getSignedUrls: () => {
+            return createSignedUrlHandler(getImageUrlsMutation, {
+                onError: (error) => {
+                    console.error('Failed to get category image signed URLs:', error);
+                }
+            });
+        },
+
+        /**
+         * Category-specific upload workflow that matches existing pending changes pattern
+         */
+        uploadWithPendingChanges: (categoryId: string) => {
+            const uploadHandler = categoryFileHooks.uploadImage(categoryId);
+            const signedUrlHandler = categoryFileHooks.getSignedUrls();
+            
+            return async (file: File) => {
+                // Upload image first
+                const uploadResult = await uploadHandler(file, {
+                    category_id: categoryId,
+                    replace_existing: true,
+                    update_version: true
+                });
+                
+                // Get signed URL for immediate preview
+                const signedUrlResponse = await signedUrlHandler([uploadResult.imageId]);
+                
+                return {
+                    ...uploadResult,
+                    previewUrl: signedUrlResponse.urls[0]?.url,
+                    // Match existing category pending changes structure
+                    pendingChanges: {
+                        image_id: uploadResult.imageId,
+                        has_image_change: true,
+                        pending_image_url: signedUrlResponse.urls[0]?.url
+                    }
+                };
+            };
+        },
+
+        /**
+         * Integration with existing category modal save pattern
+         */
+        prepareCategorySave: () => {
+            return {
+                uploadImage: categoryFileHooks.uploadImage,
+                
+                // This would integrate with existing category save logic
+                saveWithImage: async (categoryId: string, file: File, otherChanges: any) => {
+                    const uploadHandler = categoryFileHooks.uploadImage(categoryId);
+                    
+                    // Upload image
+                    const imageResult = await uploadHandler(file, {
+                        category_id: categoryId
+                    });
+                    
+                    // Return data structure that matches existing category save format
+                    return {
+                        fieldUpdates: [
+                            ...otherChanges.fieldUpdates || [],
+                            {
+                                field: 'image_id',
+                                value: imageResult.imageId
+                            }
+                        ],
+                        localizationUpdates: otherChanges.localizationUpdates || [],
+                        imageFile: file,
+                        uploadResult: imageResult
+                    };
+                }
+            };
+        },
+
+        /**
+         * Cache management that extends existing category hooks pattern
+         */
+        invalidateCache: {
+            categoryImage: (categoryId: string) => {
+                // Use existing category hooks invalidation
+                existingCategoryHooks.invalidateCache.categories();
+                console.log('Invalidating category image cache for:', categoryId);
+            },
+            
+            allCategoryImages: () => {
+                // Use existing category hooks invalidation  
+                existingCategoryHooks.invalidateCache.all();
+                console.log('Invalidating all category image caches');
+            }
+        }
+    };
+
+    return categoryFileHooks;
+};

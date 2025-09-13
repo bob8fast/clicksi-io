@@ -1,0 +1,417 @@
+// examples/integration-examples.tsx
+// Real-world integration examples using the new file upload hooks
+
+import React, { useState } from 'react';
+import { FileUploader, ImageDisplay } from '../index';
+import { useProfileFileUpload } from '../hooks/useProfileFileUpload';
+import { useVerificationFileUpload } from '../hooks/useVerificationFileUpload';
+import { useCategoryFileUpload } from '../hooks/useCategoryFileUpload';
+import type { FileWithId } from '../types/file-uploader.types';
+
+/**
+ * Real Profile Image Upload Integration
+ * Shows how to integrate with actual orval hooks following the const object pattern
+ */
+export const ProfileImageUploadIntegration = () => {
+    const [selectedFiles, setSelectedFiles] = useState<FileWithId[]>([]);
+    const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+    const [isUploading, setIsUploading] = useState(false);
+    
+    const profileFileHooks = useProfileFileUpload();
+    const uploadWithPreview = profileFileHooks.uploadWithPreview();
+    
+    const handleFileSelect = async (filesWithId: FileWithId[]) => {
+        const fileWithId = filesWithId[0];
+        setSelectedFiles([fileWithId]);
+        setIsUploading(true);
+        
+        try {
+            // Upload with immediate preview using the integrated hook
+            const result = await uploadWithPreview(fileWithId.file);
+            
+            // Set signed URL for preview (takes priority over blob URL)
+            setPreviewUrls({
+                [fileWithId.fileId]: result.previewUrl
+            });
+            
+            console.log('Profile image uploaded successfully:', result.imageId);
+        } catch (error) {
+            console.error('Profile image upload failed:', error);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+    
+    const handleFileRemove = (fileId: string) => {
+        setSelectedFiles([]);
+        setPreviewUrls({});
+    };
+    
+    return (
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-[#EDECF8]">Profile Image Upload</h3>
+            <FileUploader
+                fileType="image"
+                onFileSelect={handleFileSelect}
+                onFileRemove={handleFileRemove}
+                selectedFiles={selectedFiles}
+                previewUrls={previewUrls}
+                isUploading={isUploading}
+                preview={{ enabled: true, type: 'full' }}
+                variant="dropzone"
+                className="border border-[#575757] rounded-lg"
+            />
+        </div>
+    );
+};
+
+/**
+ * Verification Document Upload - Form Submission Pattern
+ * Files are selected but NOT uploaded until form submission
+ * Integrates with existing verification form logic
+ */
+export const VerificationDocumentIntegration = ({ 
+    documentType,
+    existingDocument,
+    onFormSubmit 
+}: { 
+    documentType: string;
+    existingDocument?: any;
+    onFormSubmit?: (formData: any) => void;
+}) => {
+    const [selectedFiles, setSelectedFiles] = useState<FileWithId[]>([]);
+    const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+    const [formData, setFormData] = useState({
+        user_notes: '',
+        document_purpose: documentType
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    const verificationFileHooks = useVerificationFileUpload();
+    
+    // Initialize with existing document if provided
+    useEffect(() => {
+        if (existingDocument && !selectedFiles.length) {
+            const existingFiles = verificationFileHooks.convertExistingDocumentsToFileWithId([existingDocument]);
+            setSelectedFiles(existingFiles);
+            
+            // Get signed URLs for existing documents
+            if (existingDocument.image_id) {
+                verificationFileHooks.getSignedUrls([existingDocument.image_id])
+                    .then(response => {
+                        const urlMap = { [existingFiles[0].fileId]: response.urls[0]?.url };
+                        setPreviewUrls(urlMap);
+                    })
+                    .catch(console.error);
+            }
+        }
+    }, [existingDocument]);
+    
+    const handleFileSelect = (filesWithId: FileWithId[]) => {
+        // Just store files - NO upload happens here
+        setSelectedFiles(filesWithId);
+        
+        // For new files, preview URLs will be blob URLs (automatic)
+        // Component handles blob URL creation internally
+        console.log('Files selected (not uploaded):', filesWithId.map(f => f.name));
+    };
+    
+    const handleFileRemove = (fileId: string) => {
+        setSelectedFiles(prev => prev.filter(f => f.fileId !== fileId));
+        setPreviewUrls(prev => {
+            const newUrls = { ...prev };
+            delete newUrls[fileId];
+            return newUrls;
+        });
+    };
+    
+    // Form submission that includes files
+    const handleFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (selectedFiles.length === 0) {
+            alert('Please select at least one document');
+            return;
+        }
+        
+        setIsSubmitting(true);
+        
+        try {
+            // Organize files by document type
+            const filesByDocumentType = {
+                [documentType]: selectedFiles.filter(f => !f.isExisting) // Only new files
+            };
+            
+            // Validate files before submission
+            const validationErrors = verificationFileHooks.validateFilesForSubmission(
+                filesByDocumentType,
+                [documentType]
+            );
+            
+            if (validationErrors.length > 0) {
+                alert('Validation errors: ' + validationErrors.join(', '));
+                return;
+            }
+            
+            // Submit form with files using existing verification logic
+            const result = await verificationFileHooks.submitVerificationForm(
+                formData,
+                filesByDocumentType
+            );
+            
+            console.log('Verification submitted successfully:', result);
+            
+            // Notify parent component
+            onFormSubmit?.(result);
+            
+            // Clear form
+            setSelectedFiles([]);
+            setPreviewUrls({});
+            setFormData({ user_notes: '', document_purpose: documentType });
+            
+        } catch (error) {
+            console.error('Form submission failed:', error);
+            alert('Submission failed: ' + error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+    
+    return (
+        <form onSubmit={handleFormSubmit} className="space-y-4">
+            <h3 className="text-lg font-semibold text-[#EDECF8]">
+                Upload {documentType} Document
+            </h3>
+            
+            {/* File uploader - no upload on selection */}
+            <FileUploader
+                fileType="document"
+                accept={{
+                    mimeTypes: ['application/pdf', 'image/*'],
+                    extensions: ['.pdf', '.png', '.jpg'],
+                    description: 'Verification documents (PDF or images)'
+                }}
+                maxSize={10 * 1024 * 1024}
+                multiple={false} // Usually one document per type
+                onFileSelect={handleFileSelect}
+                onFileRemove={handleFileRemove}
+                selectedFiles={selectedFiles}
+                previewUrls={previewUrls} // Signed URLs for existing, blob for new
+                preview={{ enabled: true, type: 'thumbnail' }}
+                disabled={isSubmitting}
+            />
+            
+            {/* Additional form fields */}
+            <div className="space-y-3">
+                <div>
+                    <label className="block text-sm font-medium text-[#EDECF8] mb-1">
+                        Purpose / Notes (Optional)
+                    </label>
+                    <textarea
+                        value={formData.user_notes}
+                        onChange={(e) => setFormData(prev => ({ ...prev, user_notes: e.target.value }))}
+                        className="w-full p-3 bg-[#202020] border border-[#575757] rounded-lg text-[#EDECF8] placeholder-[#828288]"
+                        placeholder="Add any additional notes about this document..."
+                        rows={3}
+                        disabled={isSubmitting}
+                    />
+                </div>
+            </div>
+            
+            {/* Submit button */}
+            <div className="flex justify-between items-center p-4 bg-[#202020] rounded-lg border border-[#575757]">
+                <div className="text-sm text-[#828288]">
+                    {selectedFiles.length > 0 ? (
+                        <>Files selected: {selectedFiles.map(f => f.name).join(', ')}</>
+                    ) : (
+                        'No files selected'
+                    )}
+                </div>
+                <button
+                    type="submit"
+                    disabled={isSubmitting || selectedFiles.length === 0}
+                    className="px-6 py-2 bg-[#D78E59] text-[#171717] rounded hover:bg-[#FFAA6C] disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                    {isSubmitting ? 'Submitting...' : 'Submit Verification'}
+                </button>
+            </div>
+            
+            {/* Form explanation */}
+            <div className="text-xs text-[#575757] bg-[#202020]/30 p-3 rounded">
+                <strong>Note:</strong> Files are uploaded when you submit the form. 
+                You can select and preview files without uploading them first.
+                {existingDocument && ' Your existing document will be replaced if you select a new file.'}
+            </div>
+        </form>
+    );
+};
+
+/**
+ * Category Image Management Integration
+ * Integrates with existing category modal pattern
+ */
+export const CategoryImageManagementIntegration = ({ 
+    categoryId, 
+    onSaveChanges 
+}: { 
+    categoryId: string;
+    onSaveChanges: (changes: any) => void;
+}) => {
+    const [selectedFiles, setSelectedFiles] = useState<FileWithId[]>([]);
+    const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+    const [pendingChanges, setPendingChanges] = useState<any>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    
+    const categoryFileHooks = useCategoryFileUpload();
+    const prepareSave = categoryFileHooks.prepareCategorySave();
+    
+    const handleFileSelect = async (filesWithId: FileWithId[]) => {
+        const fileWithId = filesWithId[0]; // Single image for category
+        setSelectedFiles([fileWithId]);
+        setIsUploading(true);
+        
+        try {
+            // Upload with pending changes structure
+            const uploadHandler = categoryFileHooks.uploadWithPendingChanges(categoryId);
+            const result = await uploadHandler(fileWithId.file);
+            
+            // Set preview URL (signed URL takes priority)
+            setPreviewUrls({
+                [fileWithId.fileId]: result.previewUrl
+            });
+            
+            // Store pending changes that match existing category modal structure
+            setPendingChanges({
+                imageFile: fileWithId.file,
+                pendingImageUrl: result.previewUrl,
+                fieldUpdates: [{
+                    field: 'image_id',
+                    value: result.imageId
+                }],
+                has_image_change: true
+            });
+            
+        } catch (error) {
+            console.error('Category image upload failed:', error);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+    
+    const handleFileRemove = (fileId: string) => {
+        setSelectedFiles([]);
+        setPreviewUrls({});
+        setPendingChanges(null);
+    };
+    
+    const handleSaveChanges = async () => {
+        if (!pendingChanges) return;
+        
+        try {
+            // Use the save structure that matches existing category modal
+            const saveData = await prepareSave.saveWithImage(
+                categoryId,
+                pendingChanges.imageFile,
+                {
+                    // Other category changes would be merged here
+                    localizationUpdates: [],
+                    fieldUpdates: []
+                }
+            );
+            
+            // Call parent save handler with compatible structure
+            onSaveChanges(saveData);
+            
+            // Clear pending changes
+            setPendingChanges(null);
+            setSelectedFiles([]);
+            setPreviewUrls({});
+            
+        } catch (error) {
+            console.error('Save failed:', error);
+        }
+    };
+    
+    return (
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-[#EDECF8]">Category Image</h3>
+            
+            <FileUploader
+                fileType="image"
+                onFileSelect={handleFileSelect}
+                onFileRemove={handleFileRemove}
+                selectedFiles={selectedFiles}
+                previewUrls={previewUrls}
+                isUploading={isUploading}
+                preview={{ enabled: true, type: 'full' }}
+                variant="dropzone"
+                className="border border-[#575757] rounded-lg"
+            />
+            
+            {pendingChanges && (
+                <div className="flex justify-between items-center p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <div className="text-sm text-yellow-400">
+                        Category image has been uploaded and is ready to be saved
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSaveChanges}
+                            className="px-4 py-2 bg-[#D78E59] text-[#171717] rounded hover:bg-[#FFAA6C] text-sm"
+                        >
+                            Save Changes
+                        </button>
+                        <button
+                            onClick={() => handleFileRemove(selectedFiles[0]?.fileId || '')}
+                            className="px-4 py-2 border border-[#575757] text-[#828288] rounded hover:text-[#EDECF8] text-sm"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+/**
+ * Existing Image Display Integration
+ * Shows how to display existing images with S3 signed URLs
+ */
+export const ExistingImageDisplayIntegration = ({ 
+    userId, 
+    profileImageId 
+}: { 
+    userId: string; 
+    profileImageId?: string; 
+}) => {
+    const profileFileHooks = useProfileFileUpload();
+    const getSignedUrls = profileFileHooks.getSignedUrls();
+    
+    return (
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-[#EDECF8]">Current Profile Image</h3>
+            
+            {profileImageId ? (
+                <ImageDisplay
+                    imageId={profileImageId}
+                    onGetSignedUrls={getSignedUrls}
+                    alt="Profile image"
+                    className="w-32 h-32 rounded-full object-cover border border-[#575757]"
+                    fallback={
+                        <div className="w-32 h-32 rounded-full bg-[#202020] border border-[#575757] flex items-center justify-center">
+                            <span className="text-[#D78E59] font-bold text-3xl">
+                                {userId.charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                    }
+                    cacheKey={`profile-${userId}`}
+                    priority={true}
+                />
+            ) : (
+                <div className="w-32 h-32 rounded-full bg-[#202020] border border-[#575757] flex items-center justify-center">
+                    <span className="text-[#575757] text-sm">No image</span>
+                </div>
+            )}
+        </div>
+    );
+};

@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+/* Theme Configuration */
+@theme {
+  --color-primary: #171717;
+  --color-secondary: #090909;
+  --color-light: #EDECF8;
+  --color-gray-1: #575757;
+  --color-gray-2: #828288;
+  --color-accent: #202020;
+  --color-orange: #D78E59;
+  --color-orange-light: #FFAA6C;
+}
+
+/* Light theme override */
+:root.light {
+  --color-primary: #FFFFFF;
+  --color-secondary: #F9FAFB;
+  --color-light: #111827;
+  --color-gray-1: #D1D5DB;
+  --color-gray-2: #6B7280;
+  --color-accent: #F3F4F6;
+  --color-orange: #D78E59;
+  --color-orange-light: #FFAA6C;
+}
+
+/* Tailwind CSS v4 Layers */
+@layer base {
+  * {
+    border-color: color-mix(in srgb, var(--color-gray-1) 50%, transparent);
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: var(--color-primary);
+    color: var(--color-light);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+  }
+
+  /* Text selection styles */
+  ::selection {
+    background-color: var(--color-orange);
+    color: var(--color-primary);
+  }
+  
+  ::-moz-selection {
+    background-color: var(--color-orange);
+    color: var(--color-primary);
+  }
+  
+  /* Form focus outline styles */
+  *:focus-visible {
+    outline: 2px solid var(--color-orange);
+    outline-offset: 2px;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-gray-1);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-2);
+  }
+  
+  /* Main content with fixed header offset */
+  main {
+    padding-top: 4rem; /* or 64px */
+    min-height: calc(100vh - 80px);
+  }
+}
+
+@layer components {
+  /* Button Components */
+  .btn-primary {
+    background-color: var(--color-orange);
+    color: var(--color-primary);
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--color-orange-light);
+  }
+  
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--color-light);
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--color-gray-1);
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  
+  .btn-secondary:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-gray-2);
+  }
+  
+  /* Card Component */
+  .card {
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-accent);
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    border-color: var(--color-gray-1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Section Containers */
+  .section-container {
+    padding: 5rem 1.5rem;
+  }
+  
+  @media (min-width: 1024px) {
+    .section-container {
+      padding: 5rem 2rem;
+    }
+  }
+  
+  .section-content {
+    max-width: 1536px;
+    margin: 0 auto;
+  }
+  
+  /* Modal Styles */
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+  }
+  
+  .modal-content {
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-gray-1);
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Form Inputs */
+  .input-dark {
+    background-color: var(--color-accent);
+    border: 1px solid var(--color-gray-1);
+    color: var(--color-light);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s;
+  }
+  
+  .input-dark:focus {
+    border-color: var(--color-orange);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(215, 142, 89, 0.1);
+  }
+  
+  /* Navigation Styles */
+  .nav-link {
+    color: var(--color-gray-2);
+    transition: color 0.2s ease;
+  }
+  
+  .nav-link:hover {
+    color: var(--color-light);
+  }
+  
+  .nav-link-active {
+    color: var(--color-orange);
+  }
+}
+
+@layer utilities {
+  /* Text Utilities */
+  .text-primary { color: var(--color-primary); }
+  .text-secondary { color: var(--color-secondary); }
+  .text-light { color: var(--color-light); }
+  .text-gray-1 { color: var(--color-gray-1); }
+  .text-gray-2 { color: var(--color-gray-2); }
+  .text-accent { color: var(--color-accent); }
+  .text-orange { color: var(--color-orange); }
+  .text-orange-light { color: var(--color-orange-light); }
+  
+  /* Background Utilities */
+  .bg-primary { background-color: var(--color-primary); }
+  .bg-secondary { background-color: var(--color-secondary); }
+  .bg-light { background-color: var(--color-light); }
+  .bg-gray-1 { background-color: var(--color-gray-1); }
+  .bg-gray-2 { background-color: var(--color-gray-2); }
+  .bg-accent { background-color: var(--color-accent); }
+  .bg-orange { background-color: var(--color-orange); }
+  .bg-orange-light { background-color: var(--color-orange-light); }
+  
+  /* Border Utilities */
+  .border-primary { border-color: var(--color-primary); }
+  .border-secondary { border-color: var(--color-secondary); }
+  .border-light { border-color: var(--color-light); }
+  .border-gray-1 { border-color: var(--color-gray-1); }
+  .border-gray-2 { border-color: var(--color-gray-2); }
+  .border-accent { border-color: var(--color-accent); }
+  .border-orange { border-color: var(--color-orange); }
+  .border-orange-light { border-color: var(--color-orange-light); }
+  
+  /* Custom Utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  /* Container Utilities */
+  .container-responsive {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  /* Header Offset */
+  .header-offset {
+    padding-top: 80px;
+  }
+  
+  /* Animation Utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}

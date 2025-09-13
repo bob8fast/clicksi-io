@@ -1,0 +1,149 @@
+// hooks/useFileUploadIntegration.ts
+// Integration hooks for connecting FileUploader with orval-generated hooks
+
+import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { BaseSignedUrlResponse, UploadResult } from '../types/file-uploader.types';
+
+/**
+ * Generic file upload integration hook that follows the const object pattern
+ * Used to connect FileUploader component with orval-generated hooks
+ */
+export const useFileUploadIntegration = () => {
+    const queryClient = useQueryClient();
+
+    /**
+     * Creates a standardized upload handler for any orval hook
+     */
+    const createUploadHandler = useCallback(<T extends UploadResult>(
+        orvalMutation: any,
+        options?: {
+            onSuccess?: (result: T) => void;
+            onError?: (error: any) => void;
+            invalidateQueries?: string[];
+        }
+    ) => {
+        return (file: File, metadata?: Record<string, any>) => {
+            return new Promise<T>((resolve, reject) => {
+                orvalMutation(
+                    { data: { ...metadata, file } },
+                    {
+                        onSuccess: (data: T) => {
+                            // Invalidate related queries
+                            if (options?.invalidateQueries) {
+                                options.invalidateQueries.forEach(queryKey => {
+                                    queryClient.invalidateQueries({ queryKey: [queryKey] });
+                                });
+                            }
+                            
+                            options?.onSuccess?.(data);
+                            resolve(data);
+                        },
+                        onError: (error: any) => {
+                            options?.onError?.(error);
+                            reject(error);
+                        }
+                    }
+                );
+            });
+        };
+    }, [queryClient]);
+
+    /**
+     * Creates a standardized signed URL handler for any orval hook
+     */
+    const createSignedUrlHandler = useCallback((
+        orvalMutation: any,
+        options?: {
+            onError?: (error: any) => void;
+        }
+    ) => {
+        return async (imageIds: string[]): Promise<BaseSignedUrlResponse> => {
+            try {
+                const response = await orvalMutation({
+                    data: { image_storage_paths: imageIds }
+                });
+                
+                // Normalize response to match BaseSignedUrlResponse
+                return {
+                    ttl_seconds: response.ttl_seconds || 3600,
+                    expires_at: response.expires_at || new Date(Date.now() + 3600000).toISOString(),
+                    urls: (response.urls || response.image_urls || []).map((item: any) => ({
+                        media_id: item.media_id || item.image_id,
+                        url: item.url,
+                        ...item // Preserve service-specific fields
+                    })),
+                    ...response // Preserve service-specific response fields
+                };
+            } catch (error) {
+                options?.onError?.(error);
+                throw error;
+            }
+        };
+    }, []);
+
+    /**
+     * Creates a temporary upload handler for staging files before permanent upload
+     */
+    const createTempUploadHandler = useCallback((
+        orvalMutation: any,
+        options?: {
+            onSuccess?: (result: any) => void;
+            onError?: (error: any) => void;
+        }
+    ) => {
+        return async (file: File, metadata?: Record<string, any>) => {
+            try {
+                const result = await orvalMutation({
+                    data: { ...metadata, file }
+                });
+                
+                options?.onSuccess?.(result);
+                return result;
+            } catch (error) {
+                options?.onError?.(error);
+                throw error;
+            }
+        };
+    }, []);
+
+    /**
+     * Creates a permanent upload confirmation handler
+     */
+    const createConfirmUploadHandler = useCallback((
+        orvalMutation: any,
+        options?: {
+            onSuccess?: (result: any) => void;
+            onError?: (error: any) => void;
+            invalidateQueries?: string[];
+        }
+    ) => {
+        return async (tempId: string, metadata?: Record<string, any>) => {
+            try {
+                const result = await orvalMutation({
+                    data: { temp_id: tempId, ...metadata }
+                });
+                
+                // Invalidate related queries
+                if (options?.invalidateQueries) {
+                    options.invalidateQueries.forEach(queryKey => {
+                        queryClient.invalidateQueries({ queryKey: [queryKey] });
+                    });
+                }
+                
+                options?.onSuccess?.(result);
+                return result;
+            } catch (error) {
+                options?.onError?.(error);
+                throw error;
+            }
+        };
+    }, [queryClient]);
+
+    return {
+        createUploadHandler,
+        createSignedUrlHandler,
+        createTempUploadHandler,
+        createConfirmUploadHandler
+    };
+};
