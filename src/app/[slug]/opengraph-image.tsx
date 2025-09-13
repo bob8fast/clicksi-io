@@ -16,22 +16,10 @@ interface Props {
 export default async function Image({ params }: Props) {
   const { slug } = await params;
 
-  // Since we're in Edge Runtime, we can't use pg directly
-  // Instead, we'll fetch from our API or use static content
-  let page = null;
-  try {
-    // Try to fetch from our API endpoint instead of direct DB call
-    const response = await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/dynamic-pages?slug=${slug}`);
-    if (response.ok) {
-      page = await response.json();
-    }
-  } catch (error) {
-    // Fallback if API not accessible
-    page = null;
-  }
-
-  const title = page?.title || 'Clicksi';
-  const description = page?.description || 'Connect Brands with Creators';
+  // Edge Runtime - use static fallbacks for OpenGraph images
+  // Dynamic content is not reliable in Edge Runtime, so we use generic branding
+  const title = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ');
+  const description = 'Connect Brands with Creators';
 
   return new ImageResponse(
     (
