@@ -9,21 +9,26 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
+type JSONContent = string | { type: string; value: string }
+
 export interface PageRecord {
   id: string
   slug: string
   title: string
-  content: string | { type: string; value: string }
+  content: JSONContent
   description?: string
-  meta_description?: string
-  meta_keywords?: string
-  og_title?: string
-  og_description?: string
-  og_image?: string
+  keywords: any
   status: string
+  lang: string
+  images: any
+  videos: any
   show_title: boolean
-  show_metadata: boolean
   show_description: boolean
+  show_metadata: boolean
+  show_back?: boolean
+  show_header?: boolean
+  show_footer?: boolean
+  back?: JSONContent
   created_at: string
   updated_at: string
 }

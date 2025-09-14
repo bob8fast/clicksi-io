@@ -4,7 +4,8 @@ import { getPageBySlug, getAllPublishedSlugs } from '@/lib/db'
 import { generatePageSEO } from '@/lib/seo'
 import { REVALIDATE_TIME } from '@/lib/cache'
 import { isLegalPage, getLegalComponent } from '@/lib/legal-fallbacks'
-import ClientDynamicPage from '@/components/ClientDynamicPage'
+import ClientDynamicPage from '@/components/dynamic/ClientDynamicPage'
+import StandaloneDynamicPage from '@/components/dynamic/StandaloneDynamicPage'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -54,9 +55,14 @@ export default async function DynamicPage({ params }: PageProps) {
   const { slug } = await params
   const page = await getPageBySlug(slug)
 
-  // If dynamic page exists in database (including legal pages), render it
+  // If dynamic page exists in database, render it with appropriate component
   if (page) {
-    return <ClientDynamicPage page={page} />
+    // Legal pages always show header/footer via layout
+    if (isLegalPage(slug)) {
+      return <ClientDynamicPage page={page} />
+    }
+    // Non-legal pages use conditional header/footer
+    return <StandaloneDynamicPage page={page} />
   }
 
   // If no database page but is a legal page, fall back to static component

@@ -1,7 +1,7 @@
 import { getPageBySlug } from '@/lib/db'
 import { generatePageSEO } from '@/lib/seo'
 import TermsOfServicePage from '@/components/legal/TermsOfServicePage'
-import ClientDynamicPage from '@/components/ClientDynamicPage'
+import ClientDynamicPage from '@/components/dynamic/ClientDynamicPage'
 
 export const revalidate = false // Only manual revalidation
 
