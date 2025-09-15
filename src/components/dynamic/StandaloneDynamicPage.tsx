@@ -5,13 +5,27 @@ import { useEffect, useState } from 'react'
 import RevalidationScript from '@/components/dynamic/RevalidationScript'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import { convertContentToHtml } from '@/lib/content-converter'
 
 interface StandaloneDynamicPageProps {
   page: PageRecord
 }
 
-function renderContent(content: string | { type: string; value: string }) {
-  return typeof content === 'object' && content?.value ? content.value : content
+function renderContent(content: string | { type: string; value: any }) {
+  return convertContentToHtml(content);
+}
+
+function renderStyles(style: string | { type: string; value: string } | undefined) {
+  if (!style) return null
+  const styleContent = typeof style === 'object' && style?.value ? style.value : style
+  if (!styleContent || typeof styleContent !== 'string') return null
+
+  return (
+    <style
+      dangerouslySetInnerHTML={{ __html: styleContent }}
+      key="page-styles"
+    />
+  )
 }
 
 function formatDate(dateString: string) {
@@ -38,10 +52,11 @@ export default function StandaloneDynamicPage({ page }: StandaloneDynamicPagePro
   }
 
   const hasPageHeader = page.show_title || page.show_description || page.show_metadata
-  const showBackButton = page.show_back && page.back
+  const showBackButton = page.show_button && page.button
 
   return (
     <div className="flex flex-col min-h-screen">
+      {renderStyles(page.style)}
       <RevalidationScript />
 
       {/* Conditional Header */}
@@ -52,7 +67,7 @@ export default function StandaloneDynamicPage({ page }: StandaloneDynamicPagePro
         <div className="section-container">
           <div className="section-content">
             {showBackButton && (
-              <div className="mb-6" dangerouslySetInnerHTML={{ __html: renderContent(page.back!) }} />
+              <div className="mb-6" dangerouslySetInnerHTML={{ __html: renderContent(page.button!) }} />
             )}
 
             {hasPageHeader && (

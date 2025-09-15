@@ -53,6 +53,7 @@
     "cmdk": "^1.1.1",
     "cookies-next": "^5.1.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.2",
     "emoji-picker-react": "^4.13.2",
     "lucide-react": "^0.482.0",
     "memoizee": "^0.4.17",

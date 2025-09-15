@@ -16,6 +16,7 @@ export interface PageRecord {
   slug: string
   title: string
   content: JSONContent
+  style?: JSONContent
   description?: string
   keywords: any
   status: string
@@ -25,10 +26,10 @@ export interface PageRecord {
   show_title: boolean
   show_description: boolean
   show_metadata: boolean
-  show_back?: boolean
+  show_button?: boolean
   show_header?: boolean
   show_footer?: boolean
-  back?: JSONContent
+  button?: JSONContent
   created_at: string
   updated_at: string
 }
