@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -34,13 +35,30 @@ export interface PageRecord {
   updated_at: string
 }
 
-export async function getPageBySlug(slug: string, lang: string = 'en'): Promise<PageRecord | null> {
+/**
+ * Get the user's preferred language from cookies
+ */
+async function getPreferredLanguage(): Promise<string> {
+  try {
+    const cookieStore = await cookies()
+    const language = cookieStore.get('language')?.value
+    return ['en', 'pl', 'ua'].includes(language || '') ? language! : 'en'
+  } catch {
+    // If cookies() fails (e.g., in client component), return default
+    return 'en'
+  }
+}
+
+export async function getPageBySlug(slug: string, lang?: string): Promise<PageRecord | null> {
+  // Use provided language or get from cookies, fallback to 'en'
+  const selectedLang = lang || await getPreferredLanguage()
+
   const { data, error } = await supabase
     .from('pages')
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
-    .eq('lang', lang)
+    .eq('lang', selectedLang)
     .single()
 
   if (error) {
@@ -50,7 +68,7 @@ export async function getPageBySlug(slug: string, lang: string = 'en'): Promise<
     }
 
     // Only log unexpected errors
-    console.error('Unexpected database error for slug:', slug, 'lang:', lang, error)
+    console.error('Unexpected database error for slug:', slug, 'lang:', selectedLang, error)
     return null
   }
 
@@ -72,12 +90,15 @@ export async function getAllPublishedPages(): Promise<PageRecord[]> {
   return data || []
 }
 
-export async function getAllPublishedSlugs(lang: string = 'en'): Promise<string[]> {
+export async function getAllPublishedSlugs(lang?: string): Promise<string[]> {
+  // Use provided language or get from cookies, fallback to 'en'
+  const selectedLang = lang || await getPreferredLanguage()
+
   const { data, error } = await supabase
     .from('pages')
     .select('slug')
     .eq('status', 'published')
-    .eq('lang', lang)
+    .eq('lang', selectedLang)
 
   if (error) {
     console.error('Error fetching slugs:', error)

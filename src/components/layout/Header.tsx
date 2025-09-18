@@ -5,6 +5,7 @@
 import { ClicksiLogo } from '@/components/icons/ClicksiIcons';
 import MobileMenu from '@/components/layout/MobileMenu';
 import FullscreenSearch from '@/components/layout/search/FullscreenSearch';
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -204,6 +205,9 @@ const Header = () =>
                     {/* Search Icon - Always visible for all screen sizes when authenticated */}
                     {searchButton}
 
+                    {/* Language Switcher */}
+                    <LanguageSwitcher />
+
                     {/* Notifications */}
                     <Popover>
                         <PopoverTrigger asChild>
@@ -296,6 +300,9 @@ const Header = () =>
                 <>
                     {/* Search Icon for guests */}
                     {searchButton}
+
+                    {/* Language Switcher */}
+                    <LanguageSwitcher />
 
                     {/* Sign In button - only show on large screens */}
                     {isLargeScreen && (
