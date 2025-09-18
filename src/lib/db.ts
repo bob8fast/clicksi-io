@@ -34,12 +34,13 @@ export interface PageRecord {
   updated_at: string
 }
 
-export async function getPageBySlug(slug: string): Promise<PageRecord | null> {
+export async function getPageBySlug(slug: string, lang: string = 'en'): Promise<PageRecord | null> {
   const { data, error } = await supabase
     .from('pages')
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
+    .eq('lang', lang)
     .single()
 
   if (error) {
@@ -49,7 +50,7 @@ export async function getPageBySlug(slug: string): Promise<PageRecord | null> {
     }
 
     // Only log unexpected errors
-    console.error('Unexpected database error for slug:', slug, error)
+    console.error('Unexpected database error for slug:', slug, 'lang:', lang, error)
     return null
   }
 
@@ -71,11 +72,12 @@ export async function getAllPublishedPages(): Promise<PageRecord[]> {
   return data || []
 }
 
-export async function getAllPublishedSlugs(): Promise<string[]> {
+export async function getAllPublishedSlugs(lang: string = 'en'): Promise<string[]> {
   const { data, error } = await supabase
     .from('pages')
     .select('slug')
     .eq('status', 'published')
+    .eq('lang', lang)
 
   if (error) {
     console.error('Error fetching slugs:', error)
