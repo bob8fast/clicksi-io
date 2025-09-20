@@ -15,21 +15,21 @@ export function generatePageSEO(page: PageRecord, baseUrl: string): Metadata {
   const url = `${baseUrl}/${page.slug}`
 
   return {
-    title: page.title,
-    description: page.description,
-    keywords: page.keywords?.join(', '),
+    title: page.og_title || page.title,
+    description: page.meta_description || page.og_description,
+    keywords: page.meta_keywords,
     openGraph: {
-      title: page.title,
-      description: page.description,
+      title: page.og_title || page.title,
+      description: page.og_description || page.meta_description,
       url,
       type: 'article',
-      images: page.images?.length ? page.images.map(img => ({ url: img })) : undefined,
+      images: page.og_image ? [{ url: page.og_image }] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
-      title: page.title,
-      description: page.description,
-      images: page.images?.length ? page.images : undefined,
+      title: page.og_title || page.title,
+      description: page.og_description || page.meta_description,
+      images: page.og_image ? [page.og_image] : undefined,
     },
     alternates: {
       canonical: url,

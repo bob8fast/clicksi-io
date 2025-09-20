@@ -3,11 +3,35 @@
 import { PageRecord } from '@/lib/db'
 import { useEffect, useState } from 'react'
 import RevalidationScript from '@/components/dynamic/RevalidationScript'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import { convertContentToHtml } from '@/lib/content-converter'
 
 interface ClientDynamicPageProps {
   page: PageRecord
+}
+
+function renderContent(content: string | { type: string; value: any }) {
+  return convertContentToHtml(content);
+}
+
+function renderStyles(style: string | { type: string; value: string } | undefined) {
+  if (!style) return null
+  const styleContent = typeof style === 'object' && style?.value ? style.value : style
+  if (!styleContent || typeof styleContent !== 'string') return null
+
+  return (
+    <style
+      dangerouslySetInnerHTML={{ __html: styleContent }}
+      key="page-styles"
+    />
+  )
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
 export default function ClientDynamicPage({ page }: ClientDynamicPageProps) {
@@ -18,82 +42,46 @@ export default function ClientDynamicPage({ page }: ClientDynamicPageProps) {
   }, [])
 
   if (!mounted) {
-    // Return a basic structure during SSR to avoid hydration mismatch
-    return (
-      <div className="flex flex-col min-h-screen">
-        <div style={{ minHeight: '200px' }} />
-      </div>
-    )
+    return <div style={{ minHeight: '200px' }} />
   }
 
+  const hasPageHeader = page.show_title || page.show_description || page.show_metadata
+  const showBackButton = page.show_button && page.button
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <>
+      {renderStyles(page.style)}
       <RevalidationScript />
+      <div className="bg-[#171717] py-16">
+          <div className="max-w-4xl mx-auto px-6 lg:px-8">
+          {showBackButton && (
+            <div className="mb-6" dangerouslySetInnerHTML={{ __html: renderContent(page.button!) }} />
+          )}
 
-      {/* Conditional Header */}
-      {page.show_header && <Header />}
-
-      {/* Main Content */}
-      <main className={`flex-grow ${page.show_header ? 'pt-16' : ''}`}>
-        <div className="section-container">
-          <div className="section-content">
-          {/* Conditional header section */}
-          {(page.show_title || page.show_description || page.show_metadata) && (
+          {hasPageHeader && (
             <div className="mb-12">
-              {/* Back button - completely from database */}
-              {page.show_back && page.back && page.show_title && (
-                <div className="mb-6">
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: typeof page.back === 'object' && page.back?.value
-                        ? page.back.value
-                        : page.back
-                    }}
-                  />
-                </div>
-              )}
-
               {page.show_title && (
-                <h1 className="text-5xl font-bold text-light mb-8">
-                  {page.title}
-                </h1>
+                <h1 className="text-5xl font-bold text-[#EDECF8] mb-8">{page.title}</h1>
               )}
 
               {page.show_description && page.description && (
-                <p className="text-xl text-gray-2 leading-relaxed mb-6">
-                  {page.description}
-                </p>
+                <p className="text-[#828288] mb-6">{page.description}</p>
               )}
 
               {page.show_metadata && (
-                <div className="text-sm text-gray-2 mb-6">
-                  <strong>
-                    Last updated: {new Date(page.updated_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </strong>
+                <div className="text-[#828288] mb-6">
+                  <strong>Last updated: {formatDate(page.updated_at)}</strong>
                 </div>
               )}
             </div>
           )}
 
-          {/* Main content */}
           <div
             className="prose prose-invert max-w-none"
-            dangerouslySetInnerHTML={{
-              __html: typeof page.content === 'object' && page.content?.value
-                ? page.content.value
-                : page.content
-            }}
+            dangerouslySetInnerHTML={{ __html: renderContent(page.content) }}
           />
-          </div>
         </div>
-      </main>
-
-      {/* Conditional Footer */}
-      {page.show_footer && <Footer />}
-    </div>
+      </div>
+    </>
   )
 }

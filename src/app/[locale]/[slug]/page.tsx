@@ -75,7 +75,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
   // If no database page but is a legal page, fall back to static component
   if (isLegalPage(slug)) {
-    const LegalComponent = getLegalComponent(slug)
+    const LegalComponent = getLegalComponent(slug, locale)
 
     if (LegalComponent) {
       return (

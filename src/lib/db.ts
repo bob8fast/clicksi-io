@@ -62,13 +62,42 @@ export async function getPageBySlug(slug: string, lang?: string): Promise<PageRe
     .single()
 
   if (error) {
-    // If it's a "not found" error, that's expected - don't log as error
+    // If it's a "not found" error and not already trying English, fallback to English
+    if (error.code === 'PGRST116' && selectedLang !== 'en') {
+      console.log(`Page '${slug}' not found in '${selectedLang}', falling back to English`)
+      return getPageBySlugWithFallback(slug, 'en')
+    }
+
+    // If it's a "not found" error for English or other languages, that's expected
     if (error.code === 'PGRST116') {
       return null
     }
 
     // Only log unexpected errors
     console.error('Unexpected database error for slug:', slug, 'lang:', selectedLang, error)
+    return null
+  }
+
+  return data
+}
+
+/**
+ * Internal function to get page without fallback logic to prevent infinite recursion
+ */
+async function getPageBySlugWithFallback(slug: string, lang: string): Promise<PageRecord | null> {
+  const { data, error } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .eq('lang', lang)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null
+    }
+    console.error('Unexpected database error for fallback slug:', slug, 'lang:', lang, error)
     return null
   }
 

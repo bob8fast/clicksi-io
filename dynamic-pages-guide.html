@@ -1,0 +1,878 @@
+<body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background-color: #171717; color: #EDECF8; line-height: 1.6;">
+
+    <style>
+        /* Clicksi Project Variables */
+        :root {
+            --color-primary: #171717;
+            --color-secondary: #090909;
+            --color-light: #EDECF8;
+            --color-gray-1: #575757;
+            --color-gray-2: #828288;
+            --color-accent: #202020;
+            --color-orange: #D78E59;
+            --color-orange-light: #FFAA6C;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            border-color: color-mix(in srgb, var(--color-gray-1) 50%, transparent);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--color-primary);
+            color: var(--color-light);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+        }
+
+        /* Selection Styles */
+        ::selection {
+            background-color: var(--color-orange);
+            color: var(--color-primary);
+        }
+
+        ::-moz-selection {
+            background-color: var(--color-orange);
+            color: var(--color-primary);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-gray-1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-gray-2);
+        }
+
+        /* Component Styles */
+        .btn-primary {
+            background-color: var(--color-orange);
+            color: var(--color-primary);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-orange-light);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--color-light);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 2px solid var(--color-gray-1);
+            transition: background-color 0.2s, border-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--color-accent);
+            border-color: var(--color-gray-2);
+        }
+
+        .card {
+            background-color: var(--color-primary);
+            border: 1px solid var(--color-accent);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--color-gray-1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-container {
+            padding: 5rem 1.5rem;
+        }
+
+        .section-content {
+            max-width: 1536px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 50%, var(--color-accent) 100%);
+            padding: 6rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(215, 142, 89, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(215, 142, 89, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.025em;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--color-gray-2);
+            margin-bottom: 2rem;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--color-secondary);
+            border: 1px solid var(--color-accent);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: var(--color-light);
+        }
+
+        .code-inline {
+            background: var(--color-accent);
+            color: var(--color-orange);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Documentation Styles */
+        .doc-section {
+            margin-bottom: 3rem;
+        }
+
+        .doc-section h2 {
+            color: var(--color-orange);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--color-accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .doc-section h3 {
+            color: var(--color-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
+        }
+
+        .doc-section h4 {
+            color: var(--color-orange);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        .doc-section p {
+            color: var(--color-gray-2);
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .doc-section ul, .doc-section ol {
+            color: var(--color-gray-2);
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .doc-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Warning/Info Boxes */
+        .info-box {
+            background: var(--color-accent);
+            border-left: 4px solid var(--color-orange);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .warning-box {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid #ff6b6b;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .success-box {
+            background: rgba(82, 196, 26, 0.1);
+            border-left: 4px solid #52c41a;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        /* Table Styles */
+        .property-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--color-secondary);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .property-table th {
+            background: var(--color-accent);
+            color: var(--color-orange);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .property-table td {
+            padding: 1rem;
+            border-top: 1px solid var(--color-accent);
+            color: var(--color-gray-2);
+        }
+
+        .property-table td:first-child {
+            color: var(--color-light);
+            font-weight: 600;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 4rem 1rem 3rem;
+            }
+
+            .section-container {
+                padding: 3rem 1rem;
+            }
+
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .property-table {
+                font-size: 0.9rem;
+            }
+
+            .property-table th,
+            .property-table td {
+                padding: 0.75rem;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mt-8 { margin-top: 2rem; }
+    </style>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>📄 Dynamic Pages Guide</h1>
+            <p>Complete guide to creating and managing dynamic pages in the Clicksi platform</p>
+            <div>
+                <a href="#overview" class="btn-primary">Get Started</a>
+                <a href="#examples" class="btn-secondary">View Examples</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Content -->
+    <section class="section-container">
+        <div class="section-content">
+
+            <!-- Overview Section -->
+            <div id="overview" class="doc-section">
+                <h2>📋 Overview</h2>
+                <p>Dynamic pages in Clicksi allow you to create content-driven pages that are stored in the database and rendered dynamically. This system supports multilingual content, custom styling, and flexible layouts.</p>
+
+                <div class="info-box">
+                    <strong>🎯 Key Features:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>Database-driven content management</li>
+                        <li>Multilingual support (English, Ukrainian, Polish)</li>
+                        <li>Custom CSS styling per page</li>
+                        <li>Conditional header/footer display</li>
+                        <li>Language fallback to English</li>
+                        <li>SEO-friendly metadata</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Database Schema Section -->
+            <div class="doc-section">
+                <h2>🗄️ Database Schema</h2>
+                <p>Dynamic pages are stored in the <span class="code-inline">pages</span> table with the following structure:</p>
+
+                <table class="property-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>id</td>
+                            <td>string</td>
+                            <td>Unique identifier (UUID)</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>slug</td>
+                            <td>string</td>
+                            <td>URL slug (e.g., "demo", "about-us")</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>title</td>
+                            <td>string</td>
+                            <td>Page title for SEO and display</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>content</td>
+                            <td>JSONContent</td>
+                            <td>Main page content (HTML, JSON, or text)</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>style</td>
+                            <td>JSONContent</td>
+                            <td>Custom CSS styles for the page</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td>description</td>
+                            <td>string</td>
+                            <td>Meta description for SEO</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td>keywords</td>
+                            <td>array</td>
+                            <td>SEO keywords</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td>status</td>
+                            <td>string</td>
+                            <td>"published", "draft", "archived"</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>lang</td>
+                            <td>string</td>
+                            <td>"en", "ua", "pl"</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>show_title</td>
+                            <td>boolean</td>
+                            <td>Display page title</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>show_description</td>
+                            <td>boolean</td>
+                            <td>Display page description</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>show_metadata</td>
+                            <td>boolean</td>
+                            <td>Display last updated date</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>show_header</td>
+                            <td>boolean</td>
+                            <td>Include site header</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>show_footer</td>
+                            <td>boolean</td>
+                            <td>Include site footer</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>show_button</td>
+                            <td>boolean</td>
+                            <td>Show custom button/navigation</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td>button</td>
+                            <td>JSONContent</td>
+                            <td>Custom button HTML</td>
+                            <td>No</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Content Types Section -->
+            <div class="doc-section">
+                <h2>📝 Content Types</h2>
+                <p>The content field supports multiple formats through the <span class="code-inline">JSONContent</span> type:</p>
+
+                <h3>1. HTML Content</h3>
+                <div class="code-block">
+<pre>{
+  "type": "html",
+  "value": "&lt;h1&gt;Welcome to Clicksi&lt;/h1&gt;&lt;p&gt;Ukrainian creator platform&lt;/p&gt;"
+}</pre>
+                </div>
+
+                <h3>2. Plain Text</h3>
+                <div class="code-block">
+<pre>{
+  "type": "text",
+  "value": "Simple text content that will be escaped for safety"
+}</pre>
+                </div>
+
+                <h3>3. JSON Tree Structure</h3>
+                <div class="code-block">
+<pre>{
+  "type": "json",
+  "value": [
+    {
+      "type": "element",
+      "tag": "h1",
+      "attributes": {"class": "hero-title"},
+      "children": [
+        {"type": "text", "text": "Dynamic Content"}
+      ]
+    },
+    {
+      "type": "element",
+      "tag": "p",
+      "children": [
+        {"type": "text", "text": "Built with JSON structure"}
+      ]
+    }
+  ]
+}</pre>
+                </div>
+
+                <h3>4. Direct String</h3>
+                <div class="code-block">
+<pre>"&lt;h1&gt;Direct HTML string&lt;/h1&gt;&lt;p&gt;No wrapper object needed&lt;/p&gt;"</pre>
+                </div>
+            </div>
+
+            <!-- Language Support Section -->
+            <div class="doc-section">
+                <h2>🌍 Language Support</h2>
+                <p>Clicksi supports three languages with automatic fallback functionality:</p>
+
+                <h3>Supported Languages</h3>
+                <ul>
+                    <li><strong>English (en)</strong> - Default language</li>
+                    <li><strong>Ukrainian (ua)</strong> - Primary target market</li>
+                    <li><strong>Polish (pl)</strong> - Secondary market</li>
+                </ul>
+
+                <h3>Language Fallback System</h3>
+                <p>When a page is requested in a specific language but doesn't exist, the system automatically falls back to English:</p>
+
+                <div class="code-block">
+<pre>// User requests: /ua/demo
+// 1. Try to find page with slug="demo" and lang="ua"
+// 2. If not found, fallback to slug="demo" and lang="en"
+// 3. If still not found, show 404</pre>
+                </div>
+
+                <div class="success-box">
+                    <strong>✅ Best Practice:</strong> Always create an English version of your pages as the fallback. This ensures content is always available regardless of the user's language preference.
+                </div>
+            </div>
+
+            <!-- Creating Pages Section -->
+            <div class="doc-section">
+                <h2>🔨 Creating Dynamic Pages</h2>
+
+                <h3>Database Insert Example</h3>
+                <div class="code-block">
+<pre>INSERT INTO pages (
+  id, slug, title, content, style, description,
+  keywords, status, lang, show_title, show_description,
+  show_metadata, show_header, show_footer,
+  created_at, updated_at
+) VALUES (
+  gen_random_uuid(),
+  'demo-page',
+  'Clicksi Demo Page',
+  '{"type": "html", "value": "&lt;h1&gt;Demo Content&lt;/h1&gt;&lt;p&gt;This is a demo page&lt;/p&gt;"}',
+  '{"type": "html", "value": ".custom-style { color: #D78E59; }"}',
+  'Experience the Clicksi platform demo',
+  '["demo", "clicksi", "creators", "brands"]',
+  'published',
+  'en',
+  true,
+  true,
+  true,
+  true,
+  true,
+  NOW(),
+  NOW()
+);</pre>
+                </div>
+
+                <h3>Using the API</h3>
+                <div class="code-block">
+<pre>// Create a new dynamic page
+const pageData = {
+  slug: 'new-feature',
+  title: 'New Feature Announcement',
+  content: {
+    type: 'html',
+    value: '&lt;h1&gt;Exciting New Feature!&lt;/h1&gt;&lt;p&gt;Details about the feature...&lt;/p&gt;'
+  },
+  description: 'Learn about our latest platform update',
+  status: 'published',
+  lang: 'en',
+  show_title: true,
+  show_description: true,
+  show_metadata: true,
+  show_header: true,
+  show_footer: true
+};
+
+// POST to your API endpoint
+await fetch('/api/pages', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(pageData)
+});</pre>
+                </div>
+            </div>
+
+            <!-- Custom Styling Section -->
+            <div class="doc-section">
+                <h2>🎨 Custom Styling</h2>
+                <p>Each page can have custom CSS styles that are injected into the page head:</p>
+
+                <h3>Style Format</h3>
+                <div class="code-block">
+<pre>{
+  "type": "html",
+  "value": ".hero-section { background: linear-gradient(135deg, #0057b7, #D78E59); padding: 4rem 2rem; } .custom-button { background: #D78E59; color: #171717; }"
+}</pre>
+                </div>
+
+                <h3>Best Practices</h3>
+                <ul>
+                    <li>Use CSS custom properties for consistency with theme</li>
+                    <li>Scope styles to avoid conflicts: <span class="code-inline">.page-demo .custom-style</span></li>
+                    <li>Test styles across different screen sizes</li>
+                    <li>Avoid <span class="code-inline">!important</span> unless necessary</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>⚠️ Security Note:</strong> Custom styles are injected directly into the page. Ensure styles are sanitized and come from trusted sources only.
+                </div>
+            </div>
+
+            <!-- URL Routing Section -->
+            <div class="doc-section">
+                <h2>🛣️ URL Routing</h2>
+                <p>Dynamic pages use the following URL structure:</p>
+
+                <div class="code-block">
+<pre>https://clicksi.io/[locale]/[slug]
+
+Examples:
+- https://clicksi.io/en/demo
+- https://clicksi.io/ua/about-us
+- https://clicksi.io/pl/privacy-policy</pre>
+                </div>
+
+                <h3>Route Resolution</h3>
+                <ol>
+                    <li>Extract locale and slug from URL</li>
+                    <li>Query database for matching page</li>
+                    <li>If not found, try fallback language (English)</li>
+                    <li>If still not found, check for static legal pages</li>
+                    <li>Finally, show 404 if no match found</li>
+                </ol>
+
+                <h3>Static vs Dynamic Priority</h3>
+                <p>The system prioritizes pages in this order:</p>
+                <ol>
+                    <li><strong>Database pages</strong> - Dynamic content from database</li>
+                    <li><strong>Static legal pages</strong> - Privacy policy, terms, etc.</li>
+                    <li><strong>404 page</strong> - Page not found</li>
+                </ol>
+            </div>
+
+            <!-- Examples Section -->
+            <div id="examples" class="doc-section">
+                <h2>💡 Common Examples</h2>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>🚀 Landing Page</h3>
+                        <div class="code-block">
+<pre>{
+  "slug": "launch-campaign",
+  "title": "Ukrainian Beauty Campaign Launch",
+  "content": {
+    "type": "html",
+    "value": "&lt;div class='hero'&gt;&lt;h1&gt;New Campaign&lt;/h1&gt;&lt;/div&gt;"
+  },
+  "lang": "ua",
+  "show_header": false,
+  "show_footer": false
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📰 Blog Post</h3>
+                        <div class="code-block">
+<pre>{
+  "slug": "creator-tips-2024",
+  "title": "Ukrainian Creator Tips for 2024",
+  "content": {
+    "type": "html",
+    "value": "&lt;article&gt;&lt;h1&gt;Tips&lt;/h1&gt;&lt;p&gt;Content...&lt;/p&gt;&lt;/article&gt;"
+  },
+  "lang": "ua",
+  "show_title": true,
+  "show_metadata": true
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📋 Documentation</h3>
+                        <div class="code-block">
+<pre>{
+  "slug": "api-docs",
+  "title": "Clicksi API Documentation",
+  "content": {
+    "type": "json",
+    "value": [
+      {"type": "element", "tag": "h1", "children": [{"type": "text", "text": "API Guide"}]},
+      {"type": "element", "tag": "p", "children": [{"type": "text", "text": "Documentation..."}]}
+    ]
+  }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎨 Custom Styled Page</h3>
+                        <div class="code-block">
+<pre>{
+  "slug": "brand-showcase",
+  "style": {
+    "type": "html",
+    "value": ".brand-grid { display: grid; grid-template-columns: repeat(3, 1fr); }"
+  },
+  "content": {
+    "type": "html",
+    "value": "&lt;div class='brand-grid'&gt;...&lt;/div&gt;"
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Practices Section -->
+            <div class="doc-section">
+                <h2>✅ Best Practices</h2>
+
+                <h3>🔐 Security</h3>
+                <ul>
+                    <li>Sanitize all HTML content before storing</li>
+                    <li>Validate JSON structure for content field</li>
+                    <li>Escape user-generated content</li>
+                    <li>Use parameterized queries for database operations</li>
+                </ul>
+
+                <h3>🚀 Performance</h3>
+                <ul>
+                    <li>Cache frequently accessed pages</li>
+                    <li>Optimize images and media assets</li>
+                    <li>Minimize custom CSS size</li>
+                    <li>Use database indexes on slug and lang fields</li>
+                </ul>
+
+                <h3>🌍 Internationalization</h3>
+                <ul>
+                    <li>Always provide English fallback content</li>
+                    <li>Use appropriate language codes (en, ua, pl)</li>
+                    <li>Consider cultural context in content</li>
+                    <li>Test right-to-left languages if needed</li>
+                </ul>
+
+                <h3>♿ Accessibility</h3>
+                <ul>
+                    <li>Use semantic HTML structure</li>
+                    <li>Include alt text for images</li>
+                    <li>Ensure sufficient color contrast</li>
+                    <li>Test with screen readers</li>
+                </ul>
+            </div>
+
+            <!-- API Reference Section -->
+            <div class="doc-section">
+                <h2>🔌 API Reference</h2>
+
+                <h3>Get Page by Slug</h3>
+                <div class="code-block">
+<pre>import { getPageBySlug } from '@/lib/db'
+
+// Get page in specific language
+const page = await getPageBySlug('demo', 'ua')
+
+// Get page with fallback
+const pageWithFallback = await getPageBySlug('demo') // Falls back to English</pre>
+                </div>
+
+                <h3>Content Conversion</h3>
+                <div class="code-block">
+<pre>import { convertContentToHtml } from '@/lib/content-converter'
+
+// Convert any content type to HTML
+const htmlContent = convertContentToHtml(page.content)
+
+// Server-side conversion
+const htmlContentServer = convertContentToHtmlServer(page.content)</pre>
+                </div>
+
+                <h3>Page Component Usage</h3>
+                <div class="code-block">
+<pre>import StandaloneDynamicPage from '@/components/dynamic/StandaloneDynamicPage'
+
+// Render dynamic page
+&lt;StandaloneDynamicPage page={pageData} /&gt;</pre>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Quick Reference -->
+    <section class="section-container" style="background-color: var(--color-secondary);">
+        <div class="section-content">
+            <h2 class="text-center mb-8" style="font-size: 2.5rem; font-weight: 700; color: var(--color-light);">
+                📚 Quick Reference
+            </h2>
+
+            <div class="grid-3">
+                <div class="card">
+                    <h3 style="color: var(--color-orange); margin-bottom: 1rem;">🗄️ Database Fields</h3>
+                    <ul style="color: var(--color-gray-2); font-size: 0.9rem; margin: 0;">
+                        <li>slug, title, content, style</li>
+                        <li>description, keywords, status</li>
+                        <li>lang, show_* flags</li>
+                        <li>created_at, updated_at</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--color-orange); margin-bottom: 1rem;">🌍 Languages</h3>
+                    <ul style="color: var(--color-gray-2); font-size: 0.9rem; margin: 0;">
+                        <li><strong>en</strong> - English (default)</li>
+                        <li><strong>ua</strong> - Ukrainian</li>
+                        <li><strong>pl</strong> - Polish</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--color-orange); margin-bottom: 1rem;">📝 Content Types</h3>
+                    <ul style="color: var(--color-gray-2); font-size: 0.9rem; margin: 0;">
+                        <li><code>html</code> - HTML content</li>
+                        <li><code>text</code> - Plain text</li>
+                        <li><code>json</code> - JSON tree</li>
+                        <li><code>string</code> - Direct HTML</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <a href="#overview" class="btn-primary">Back to Top</a>
+                <a href="/help-center-clean.html" class="btn-secondary">Help Center</a>
+            </div>
+        </div>
+    </section>
+
+</body>

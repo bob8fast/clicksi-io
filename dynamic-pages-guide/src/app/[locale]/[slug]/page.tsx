@@ -7,23 +7,31 @@ import ClientDynamicPage from '@/components/dynamic/ClientDynamicPage'
 import StandaloneDynamicPage from '@/components/dynamic/StandaloneDynamicPage'
 
 interface PageProps {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }
 
 export const revalidate = false // Only manual revalidation
 
 export async function generateStaticParams() {
-  const slugs = await getAllPublishedSlugs()
-  const legalSlugs = ['privacy-policy', 'terms-of-service', 'cookie-policy']
+  const locales = ['en', 'ua', 'pl']
+  const allParams = []
 
-  // Combine dynamic slugs with legal page slugs
-  const allSlugs = [...slugs, ...legalSlugs]
-  return allSlugs.map((slug) => ({ slug }))
+  for (const locale of locales) {
+    const slugs = await getAllPublishedSlugs(locale)
+    const legalSlugs = ['privacy-policy', 'terms-of-service', 'cookie-policy']
+    const allSlugs = [...slugs, ...legalSlugs]
+
+    for (const slug of allSlugs) {
+      allParams.push({ locale, slug })
+    }
+  }
+
+  return allParams
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const { slug } = await params
-  const page = await getPageBySlug(slug)
+  const { locale, slug } = await params
+  const page = await getPageBySlug(slug, locale)
 
   if (page) {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL!
@@ -51,8 +59,8 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function DynamicPage({ params }: PageProps) {
-  const { slug } = await params
-  const page = await getPageBySlug(slug)
+  const { locale, slug } = await params
+  const page = await getPageBySlug(slug, locale)
 
   // If dynamic page exists in database, render it with appropriate component
   if (page) {

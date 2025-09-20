@@ -181,11 +181,6 @@ const Header = () =>
             submenu: []
         },
         {
-            href: '/faq',
-            label: 'FAQ',
-            submenu: []
-        },
-        {
             href: '/demo-menu',
             label: 'Demo',
             submenu: []
