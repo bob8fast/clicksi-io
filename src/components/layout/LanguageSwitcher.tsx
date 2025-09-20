@@ -44,13 +44,23 @@ const LanguageSwitcher = () => {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Load language from localStorage on mount
+  // Detect current language from URL or localStorage
   useEffect(() => {
+    // First, try to get language from URL
+    const urlLocale = pathname.split('/')[1]
+    if (urlLocale && LANGUAGES.find(lang => lang.code === urlLocale)) {
+      setCurrentLanguage(urlLocale)
+      // Also save to localStorage for persistence
+      localStorage.setItem('preferred-language', urlLocale)
+      return
+    }
+
+    // Fallback to localStorage
     const savedLanguage = localStorage.getItem('preferred-language')
     if (savedLanguage && LANGUAGES.find(lang => lang.code === savedLanguage)) {
       setCurrentLanguage(savedLanguage)
     }
-  }, [])
+  }, [pathname])
 
   const handleLanguageChange = (languageCode: string) => {
     // Save to localStorage
@@ -61,8 +71,13 @@ const LanguageSwitcher = () => {
     // Set a cookie for server-side usage (optional)
     document.cookie = `language=${languageCode}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
 
-    // Refresh the current page to load content in the new language
-    router.refresh()
+    // Update URL with new locale
+    // Remove current locale from pathname and add new locale
+    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '') || '/'
+    const newPath = `/${languageCode}${pathWithoutLocale}`
+
+    // Navigate to new URL with locale
+    router.push(newPath)
 
     // Dispatch a custom event to notify other components
     window.dispatchEvent(new CustomEvent('languageChanged', {
